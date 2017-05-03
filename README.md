@@ -6,10 +6,10 @@
 
 ```sh
 # either run in foreground (ctrl-c exits the server)
-docker run -it -p 8080:8080 --rm neam/plantuml-server
+docker run -it -p 8080:8080 --rm gissehel/docker-plantuml-server
 
 # or in background (server keeps running until specifically killed)
-docker logs -f $(docker run -d -p 8080:8080 neam/plantuml-server)
+docker logs -f $(docker run -d -p 8080:8080 gissehel/docker-plantuml-server)
 ```
 
 Visit http://ip-of-your-docker-host:8080 in your browser
