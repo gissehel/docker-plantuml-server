@@ -31,7 +31,7 @@ jobs:
                   username: ${{ secrets.CR_USER }}
                   password: ${{ secrets.CR_PAT }}
 
-            - name: "Build image youtube-dl ${{ steps.vars.outputs.GITHUB_SHA_SHORT }}"
+            - name: "Build image ${{ steps.vars.outputs.IMAGE_NAME }} ${{ steps.vars.outputs.GITHUB_SHA_SHORT }}"
               uses: docker/build-push-action@v2
               with:
                   push: true
