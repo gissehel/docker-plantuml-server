@@ -40,7 +40,7 @@ jobs:
 
             - name: "Tag using version"
               run: |
-                  VERSION=$(docker run --rm=true -i "${{ steps.vars.outputs.IMAGE_NAME }}:latest" --version)
+                  VERSION=$(docker run --rm=true -i "${{ steps.vars.outputs.IMAGE_NAME }}:latest" bash -c "ls -la /usr/local/tomcat/webapps/ROOT/WEB-INF/lib/ |grep plantuml | sed -e 's/.*-//; s/\.[^\.]*$//'")
                   docker tag "${{ steps.vars.outputs.IMAGE_NAME }}:latest" "${{ steps.vars.outputs.IMAGE_NAME }}:${VERSION}"
                   docker tag "${{ steps.vars.outputs.IMAGE_NAME }}:latest" "${{ steps.vars.outputs.IMAGE_NAME }}:${VERSION}-${{ steps.vars.outputs.GITHUB_SHA_SHORT }}"
                   docker push "${{ steps.vars.outputs.IMAGE_NAME }}:${VERSION}"
