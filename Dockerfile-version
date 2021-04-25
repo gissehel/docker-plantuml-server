@@ -1,0 +1,24 @@
+FROM builder:latest
+
+ARG BUILD_DATE=now
+ARG VCS_REF=none
+ARG VERSION=not-specified
+
+LABEL \
+      org.opencontainers.image.created="${BUILD_DATE}" \
+      org.opencontainers.image.authors="gissehel" \
+      org.opencontainers.image.url="https://github.com/gissehel/docker-plantuml-server" \
+      org.opencontainers.image.source="https://github.com/gissehel/docker-plantuml-server" \
+      org.opencontainers.image.version="${VERSION}" \
+      org.opencontainers.image.revision="${VCS_REF}" \
+      org.opencontainers.image.vendor="gissehel" \
+      org.opencontainers.image.ref.name="ghcr.io/gissehel/plantuml-server" \
+      org.opencontainers.image.title="plantuml-server" \
+      org.opencontainers.image.description="Image for plantuml server (https://plantuml.com/)" \
+      org.label-schema.build-date="${BUILD_DATE}" \
+      org.label-schema.vcs-ref="${VCS_REF}" \
+      org.label-schema.name="plantuml-server" \
+      org.label-schema.version="${VERSION}" \
+      org.label-schema.vendor="gissehel" \
+      org.label-schema.vcs-url="https://github.com/gissehel/plantuml-server" \
+      org.label-schema.schema-version="1.0"

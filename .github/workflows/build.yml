@@ -24,6 +24,12 @@ jobs:
                   echo "::set-output name=GITHUB_SHA_SHORT::$(echo ${GITHUB_SHA} | cut -c1-8)"
                   echo "::set-output name=IMAGE_NAME::$(echo "ghcr.io/${{ secrets.CR_USER }}/plantuml-server")"
 
+            - name: "Set environment variables"
+              run: |
+                  echo "GITHUB_SHA_SHORT=$(echo ${GITHUB_SHA} | cut -c1-8)" >> "${GITHUB_ENV}"
+                  echo "IMAGE_NAME=$(echo ghcr.io/${{ secrets.CR_USER }}/plantuml-server)" >> "${GITHUB_ENV}"
+                  echo "BUILD_DATE=$(TZ=Europe/Paris date -Iseconds)" >> "${GITHUB_ENV}"
+
             - name: 'Login to github container registry'
               uses: docker/login-action@v1
               with:
@@ -31,20 +37,26 @@ jobs:
                   username: ${{ secrets.CR_USER }}
                   password: ${{ secrets.CR_PAT }}
 
-            - name: "Build image ${{ steps.vars.outputs.IMAGE_NAME }} ${{ steps.vars.outputs.GITHUB_SHA_SHORT }}"
+            - name: "Build image builder"
+              uses: docker/build-push-action@v2
+              with:
+                  push: false
+                  no-cache: true
+                  tags: builder:latest
+
+            - name: "Set environment variable VERSION"
+              run: |
+                  echo "VERSION=$(docker run --rm=true -i builder:latest bash -c "ls -la /usr/local/tomcat/webapps/ROOT/WEB-INF/lib/ |grep plantuml | sed -e 's/.*-//; s/\.[^\.]*$//'")" >> "${GITHUB_ENV}"
+
+            - name: "Build image ${{ env.IMAGE_NAME }} ${{ env.GITHUB_SHA_SHORT }}"
               uses: docker/build-push-action@v2
               with:
                   push: true
                   no-cache: true
-                  tags: ${{ steps.vars.outputs.IMAGE_NAME }}:latest,${{ steps.vars.outputs.IMAGE_NAME }}:${{ steps.vars.outputs.GITHUB_SHA_SHORT }}
-
-            - name: "Tag using version"
-              run: |
-                  VERSION=$(docker run --rm=true -i "${{ steps.vars.outputs.IMAGE_NAME }}:latest" bash -c "ls -la /usr/local/tomcat/webapps/ROOT/WEB-INF/lib/ |grep plantuml | sed -e 's/.*-//; s/\.[^\.]*$//'")
-                  docker tag "${{ steps.vars.outputs.IMAGE_NAME }}:latest" "${{ steps.vars.outputs.IMAGE_NAME }}:${VERSION}"
-                  docker tag "${{ steps.vars.outputs.IMAGE_NAME }}:latest" "${{ steps.vars.outputs.IMAGE_NAME }}:${VERSION}-${{ steps.vars.outputs.GITHUB_SHA_SHORT }}"
-                  docker push "${{ steps.vars.outputs.IMAGE_NAME }}:${VERSION}"
-                  docker push "${{ steps.vars.outputs.IMAGE_NAME }}:${VERSION}-${{ steps.vars.outputs.GITHUB_SHA_SHORT }}"
-
-
+                  file: "Dockerfile-version"
+                  build-args: |
+                      VCS_REF=${{ env.GITHUB_SHA_SHORT }}
+                      BUILD_DATE=${{ env.BUILD_DATE }}
+                      VERSION=${{ env.VERSION }}
+                  tags: ${{ env.IMAGE_NAME }}:latest,${{ env.IMAGE_NAME }}:${{ env.GITHUB_SHA_SHORT }},${{ env.IMAGE_NAME }}:${{ env.VERSION }},${{ env.IMAGE_NAME }}:${{ env.VERSION }}-${{ env.GITHUB_SHA_SHORT }}
 
